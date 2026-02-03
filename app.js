@@ -58,11 +58,11 @@ function showCalendar(){
   for(let i=0;i<firstDay;i++){
     const empty=document.createElement('div');
     empty.className='day';
-    empty.style.visibility='hidden'; // 空白セル非表示
+    empty.style.visibility='hidden';
     calendarDiv.appendChild(empty);
   }
 
-  // 日付
+  // 日付セル
   for(let d=1; d<=lastDate; d++){
     const dayDiv = document.createElement('div');
     dayDiv.className='day';
@@ -71,12 +71,12 @@ function showCalendar(){
 
     dayDiv.textContent = d;
 
-    // 今日の日付ハイライト
+    // 今日のハイライト
     if(today.getFullYear()===currentYear && today.getMonth()===currentMonth && today.getDate()===d){
       dayDiv.classList.add('today');
     }
 
-    // 感情タグ色
+    // 感情色
     const diaryEntry = diaries.find(e=>e.date===dateStr);
     if(diaryEntry){
       const color = emotionColors[diaryEntry.emotion] || '#ffffff';
