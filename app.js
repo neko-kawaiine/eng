@@ -1,152 +1,241 @@
-body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  margin:0; padding:0;
-  background:#f4f4f7;
-  color:#2c3e50;
+document.addEventListener("DOMContentLoaded", () => {
+    initApp();
+});
+
+let currentDate = "";
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+
+const calendarDiv = document.getElementById('calendar');
+const calendarTitle = document.getElementById('calendarTitle');
+
+const calendarScreen = document.getElementById('calendarScreen');
+const diaryScreen = document.getElementById('diaryScreen');
+const analysisScreen = document.getElementById('analysisScreen');
+
+const selectedDateH2 = document.getElementById('selectedDate');
+const wordCountDiv = document.getElementById('wordCount');
+
+const diaryText = document.getElementById('diaryText');
+const charCountDiv = document.getElementById('charCount');
+const englishWarning = document.getElementById('englishWarning');
+
+const dateModal = document.getElementById('dateModal');
+const modalDates = document.getElementById('modalDates');
+
+const TARGET_WORDS = 50;
+
+const emotionColors = {
+  'Happy':'#2ecc71',
+  'Sad':'#3498db',
+  'Tired':'#f1c40f',
+  'Excited':'#e67e22',
+  'Angry':'#e74c3c',
+  'Relaxed':'#9b59b6',
+  'Confused':'#95a5a6',
+  'Loved':'#ff6b81'
+};
+
+function initApp() {
+    showCalendar();
+    analyzeWords();
+    updateWordCount();
+    diaryText.addEventListener('input', updateWordCount);
 }
 
-h1 {
-  text-align:center;
-  margin:30px 0;
-  font-size:2.2rem;
-  color:#34495e;
+// --- Calendar ---
+function showCalendar(){
+  const diaries = JSON.parse(localStorage.getItem('diaries')||'[]');
+  calendarDiv.innerHTML='';
+
+  calendarTitle.textContent=`${currentYear} / ${currentMonth+1}`;
+
+  const firstDay = new Date(currentYear,currentMonth,1).getDay();
+  const lastDate = new Date(currentYear,currentMonth+1,0).getDate();
+  const today = new Date();
+
+  // 空セル
+  for(let i=0;i<firstDay;i++){
+    const empty=document.createElement('div');
+    empty.className='day';
+    empty.style.visibility='hidden'; // 空白セル非表示
+    calendarDiv.appendChild(empty);
+  }
+
+  // 日付
+  for(let d=1; d<=lastDate; d++){
+    const dayDiv = document.createElement('div');
+    dayDiv.className='day';
+    const dateObj = new Date(currentYear,currentMonth,d);
+    const dateStr = dateObj.toLocaleDateString();
+
+    dayDiv.textContent = d;
+
+    // 今日の日付ハイライト
+    if(today.getFullYear()===currentYear && today.getMonth()===currentMonth && today.getDate()===d){
+      dayDiv.classList.add('today');
+    }
+
+    // 感情タグ色
+    const diaryEntry = diaries.find(e=>e.date===dateStr);
+    if(diaryEntry){
+      const color = emotionColors[diaryEntry.emotion] || '#ffffff';
+      dayDiv.style.backgroundColor = color;
+      dayDiv.style.color = '#fff';
+    } else {
+      dayDiv.style.backgroundColor = '#ffffff';
+      dayDiv.style.color = '#2c3e50';
+    }
+
+    dayDiv.onclick=()=>openDiary(dateStr);
+    calendarDiv.appendChild(dayDiv);
+  }
 }
 
-.nav-btn {
-  background-color:#34495e;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  padding:8px 16px;
-  font-weight:bold;
-  cursor:pointer;
-  transition:0.3s;
-  margin:4px;
-}
-.nav-btn:hover {background-color:#1f2d3d;}
+function prevMonth(){currentMonth--; if(currentMonth<0){currentMonth=11;currentYear--;} showCalendar();}
+function nextMonth(){currentMonth++; if(currentMonth>11){currentMonth=0;currentYear++;} showCalendar();}
 
-.calendar-header {
-  display:flex;
-  justify-content:space-between;
-  max-width:700px;
-  margin:0 auto;
-  padding:10px 20px;
-}
-.calendar-title {
-  font-size:1.8rem;
-  font-weight:bold;
-  color:#34495e;
+// --- Diary ---
+function openDiary(dateStr){
+  currentDate = dateStr;
+  selectedDateH2.textContent = `Diary for ${dateStr}`;
+  diaryText.value = getDiaryText(dateStr);
+  document.getElementById('emotionTag').value = getDiaryEmotion(dateStr);
+  updateWordCount();
+  calendarScreen.style.display='none';
+  analysisScreen.style.display='none';
+  diaryScreen.style.display='block';
 }
 
-#weekdayHeader {
-  display:grid;
-  grid-template-columns:repeat(7, 1fr);
-  max-width:700px;
-  margin:0 auto 6px;
-  text-align:center;
-  font-weight:bold;
-  color:#34495e;
-}
-#weekdayHeader div {
-  padding:10px 0;
-  background:#ecf0f1;
-  border-radius:50%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+function backToCalendar(){
+  diaryScreen.style.display='none';
+  analysisScreen.style.display='none';
+  dateModal.style.display='none';
+  calendarScreen.style.display='block';
+  showCalendar();
+  analyzeWords();
 }
 
-#calendar {
-  display:grid;
-  grid-template-columns:repeat(7, 1fr);
-  gap:6px;
-  max-width:700px;
-  margin:0 auto 20px;
-}
-.day {
-  background:#ffffff;
-  border-radius:50%;
-  cursor:pointer;
-  box-shadow:0 1px 4px rgba(0,0,0,0.08);
-  transition:transform 0.2s, box-shadow 0.2s;
-  font-size:0.95rem;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  aspect-ratio:1/1;
-  color:#2c3e50;
-  font-weight:bold;
-}
-.day.today {
-  border:2px solid #1abc9c;
+// --- Word Count ---
+function updateWordCount(){
+  const text = diaryText.value.trim();
+  const words = text === "" ? 0 : text.split(/\s+/).length;
+  charCountDiv.innerHTML = `Goal: ${TARGET_WORDS} <span style="font-size:0.9rem; color:#555;">(${words} words written)</span>`;
+
+  const hasJapanese = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9faf]/.test(text);
+  englishWarning.style.display = hasJapanese ? 'block' : 'none';
+
+  diaryText.style.backgroundColor = words >= TARGET_WORDS ? '#d1f2eb' : '#ffffff';
 }
 
-#diaryScreen {
-  max-width:700px;
-  margin:20px auto;
-  padding:25px;
-  background:#ffffff;
-  border-radius:12px;
-  box-shadow:0 4px 16px rgba(0,0,0,0.08);
-}
-#diaryScreen h2 {
-  color:#34495e;
-  margin-bottom:15px;
-  font-size:1.5rem;
-}
-textarea, select, button {
-  margin-top:10px;
-}
-textarea {
-  width:100%;
-  min-height:140px;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid #bdc3c7;
-  outline:none;
-  font-size:16px;
-  transition:background 0.3s;
-}
-textarea:focus {
-  border-color:#1abc9c;
-  box-shadow:0 0 5px rgba(26,188,156,0.5);
-}
-select {
-  padding:8px 12px;
-  border-radius:8px;
-  border:1px solid #bdc3c7;
-  font-size:14px;
+// --- Save Diary ---
+function saveDiary(){
+  const text = diaryText.value.trim();
+  const emotion = document.getElementById('emotionTag').value;
+
+  if(/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9faf]/.test(text)){
+    alert("English only! Cannot save diary containing Japanese.");
+    return;
+  }
+  if(!text) return alert("Please write your diary in English.");
+
+  let diaries = JSON.parse(localStorage.getItem('diaries')||'[]');
+  const existingIndex = diaries.findIndex(e=>e.date===currentDate);
+  if(existingIndex>=0){ diaries[existingIndex]={text, emotion, date: currentDate}; }
+  else { diaries.push({text, emotion, date: currentDate}); }
+  localStorage.setItem('diaries', JSON.stringify(diaries));
+  alert("Diary saved!");
+  backToCalendar();
 }
 
-#analysisScreen {
-  max-width:700px;
-  margin:30px auto;
-}
-#analysis {
-  padding:20px 25px;
-  background:#ffffff;
-  border-radius:12px;
-  box-shadow:0 6px 20px rgba(0,0,0,0.1);
-  border-left:4px solid #1abc9c; 
-}
-#analysis h3 {
-  margin-bottom:12px;
-  font-size:1.3rem;
-  color:#34495e;
-  border-bottom:1px solid #ecf0f1;
-  padding-bottom:6px;
-}
-#wordCount {
-  font-size:1rem;
-  color:#2c3e50;
-  line-height:1.6;
+// --- Analysis ---
+function openAnalysis(){
+  calendarScreen.style.display='none';
+  diaryScreen.style.display='none';
+  analysisScreen.style.display='block';
+  analyzeWords();
 }
 
-#wordCount a {
-    color:#1abc9c;
-    text-decoration:none;
-    cursor:pointer;
+// --- Analysis / Dictionary ---
+function analyzeWords(){
+  const diaries = JSON.parse(localStorage.getItem('diaries')||'[]');
+  const allText = diaries.map(d=>d.text).join(' ');
+  const words = allText.split(/\s+/).filter(w=>w.length>2);
+  const freq = {};
+  const wordDates = {};
+
+  diaries.forEach(d=>{
+    d.text.split(/\s+/).forEach(w=>{
+      const lw = w.toLowerCase();
+      if(!wordDates[lw]) wordDates[lw]=new Set();
+      wordDates[lw].add(d.date);
+    });
+  });
+
+  words.forEach(w=>freq[w.toLowerCase()] = (freq[w.toLowerCase()]||0)+1);
+  const sortedWords = Object.keys(freq).sort();
+
+  const letters = {};
+  sortedWords.forEach(word=>{
+    const letter = word[0].toUpperCase();
+    if(!letters[letter]) letters[letter]=[];
+    letters[letter].push({word, count: freq[word], dates: Array.from(wordDates[word])});
+  });
+
+  let html = '<div style="margin-bottom:10px;">';
+  Object.keys(letters).forEach(letter=>{
+    html += `<a href="#letter-${letter}" style="margin:0 6px; font-weight:bold; color:#34495e;">${letter}</a>`;
+  });
+  html += '</div>';
+
+  Object.keys(letters).forEach(letter=>{
+    html += `<h4 id="letter-${letter}" style="margin-top:15px; color:#1abc9c;">${letter}</h4>`;
+    letters[letter].forEach(e=>{
+      html += `<div style="margin-left:15px;">
+        <span style="cursor:pointer; color:#1abc9c;" onclick="showDateModal('${e.word}')">- ${e.word}</span>: ${e.count} times
+      </div>`;
+    });
+  });
+
+  wordCountDiv.innerHTML = html;
 }
-#wordCount a:hover {
-    text-decoration:underline;
+
+// --- Modal ---
+function showDateModal(word){
+  const diaries = JSON.parse(localStorage.getItem('diaries')||'[]');
+  const filtered = diaries.filter(d=>d.text.toLowerCase().includes(word.toLowerCase()));
+
+  if(filtered.length===1){
+    openDiary(filtered[0].date);
+    return;
+  }
+
+  modalDates.innerHTML = '';
+  filtered.forEach(d=>{
+    const btn = document.createElement('button');
+    btn.textContent = `${d.date} (${d.emotion})`;
+    btn.className='nav-btn';
+    btn.style.margin='4px';
+    btn.style.backgroundColor = emotionColors[d.emotion] || '#34495e';
+    btn.style.color = '#fff';
+    btn.onclick = ()=>{ openDiary(d.date); closeModal(); };
+    modalDates.appendChild(btn);
+  });
+
+  dateModal.style.display='flex';
+}
+
+function closeModal(){
+  dateModal.style.display='none';
+}
+
+function getDiaryText(dateStr){ 
+  const diaries=JSON.parse(localStorage.getItem('diaries')||'[]'); 
+  const entry=diaries.find(e=>e.date===dateStr); 
+  return entry?entry.text:""; 
+}
+function getDiaryEmotion(dateStr){ 
+  const diaries=JSON.parse(localStorage.getItem('diaries')||'[]'); 
+  const entry=diaries.find(e=>e.date===dateStr); 
+  return entry?entry.emotion:"Happy"; 
 }
