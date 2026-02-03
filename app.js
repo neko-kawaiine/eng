@@ -43,7 +43,6 @@ function initApp() {
     diaryText.addEventListener('input', updateWordCount);
 }
 
-// --- Calendar ---
 function showCalendar(){
   const diaries = JSON.parse(localStorage.getItem('diaries')||'[]');
   calendarDiv.innerHTML='';
@@ -54,7 +53,6 @@ function showCalendar(){
   const lastDate = new Date(currentYear,currentMonth+1,0).getDate();
   const today = new Date();
 
-  // 空セル
   for(let i=0;i<firstDay;i++){
     const empty=document.createElement('div');
     empty.className='day';
@@ -62,7 +60,6 @@ function showCalendar(){
     calendarDiv.appendChild(empty);
   }
 
-  // 日付セル
   for(let d=1; d<=lastDate; d++){
     const dayDiv = document.createElement('div');
     dayDiv.className='day';
@@ -71,12 +68,10 @@ function showCalendar(){
 
     dayDiv.textContent = d;
 
-    // 今日のハイライト
     if(today.getFullYear()===currentYear && today.getMonth()===currentMonth && today.getDate()===d){
       dayDiv.classList.add('today');
     }
 
-    // 感情色
     const diaryEntry = diaries.find(e=>e.date===dateStr);
     if(diaryEntry){
       const color = emotionColors[diaryEntry.emotion] || '#ffffff';
@@ -95,7 +90,6 @@ function showCalendar(){
 function prevMonth(){currentMonth--; if(currentMonth<0){currentMonth=11;currentYear--;} showCalendar();}
 function nextMonth(){currentMonth++; if(currentMonth>11){currentMonth=0;currentYear++;} showCalendar();}
 
-// --- Diary ---
 function openDiary(dateStr){
   currentDate = dateStr;
   selectedDateH2.textContent = `Diary for ${dateStr}`;
@@ -116,7 +110,6 @@ function backToCalendar(){
   analyzeWords();
 }
 
-// --- Word Count ---
 function updateWordCount(){
   const text = diaryText.value.trim();
   const words = text === "" ? 0 : text.split(/\s+/).length;
@@ -128,7 +121,6 @@ function updateWordCount(){
   diaryText.style.backgroundColor = words >= TARGET_WORDS ? '#d1f2eb' : '#ffffff';
 }
 
-// --- Save Diary ---
 function saveDiary(){
   const text = diaryText.value.trim();
   const emotion = document.getElementById('emotionTag').value;
@@ -148,7 +140,6 @@ function saveDiary(){
   backToCalendar();
 }
 
-// --- Analysis ---
 function openAnalysis(){
   calendarScreen.style.display='none';
   diaryScreen.style.display='none';
@@ -156,7 +147,6 @@ function openAnalysis(){
   analyzeWords();
 }
 
-// --- Analysis / Dictionary ---
 function analyzeWords(){
   const diaries = JSON.parse(localStorage.getItem('diaries')||'[]');
   const allText = diaries.map(d=>d.text).join(' ');
@@ -200,7 +190,6 @@ function analyzeWords(){
   wordCountDiv.innerHTML = html;
 }
 
-// --- Modal ---
 function showDateModal(word){
   const diaries = JSON.parse(localStorage.getItem('diaries')||'[]');
   const filtered = diaries.filter(d=>d.text.toLowerCase().includes(word.toLowerCase()));
