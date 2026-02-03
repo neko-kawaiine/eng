@@ -16,7 +16,11 @@ h1,h2,h3{text-align:center;}
   align-items:center;
   margin-bottom:10px;
 }
-.calendar-title{font-size:1.7rem;font-weight:bold;}
+
+.calendar-title{
+  font-size:1.7rem;
+  font-weight:bold;
+}
 
 .nav-btn{
   padding:6px 12px;
@@ -27,31 +31,49 @@ h1,h2,h3{text-align:center;}
   cursor:pointer;
   font-weight:bold;
 }
-.nav-btn:hover{background:#2980b9;}
 
-#weekdayHeader, #calendar{
+.nav-btn:hover{
+  background:#2980b9;
+}
+
+/* ⭐ カレンダー本体（曜日と日付を完全同期） */
+#weekdayHeader,
+#calendar{
   display:grid;
   grid-template-columns:repeat(7,1fr);
   gap:0;
 }
-#weekdayHeader div, #calendar div{
-  text-align:center;
-  height:40px;
-  line-height:40px;
-}
-#weekdayHeader div{font-weight:bold;}
+
+/* ⭐ 曜日と日付のセルを完全統一 */
+#weekdayHeader div,
 #calendar div{
-  width:40px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:40px;
+  text-align:center;
+}
+
+/* 曜日 */
+#weekdayHeader div{
+  font-weight:bold;
+}
+
+/* ⭐ 日付セル */
+#calendar div{
   border:1px solid #ccc;
   border-radius:50%;
   cursor:pointer;
   font-size:0.9rem;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  aspect-ratio:1/1; /* ← 丸を維持しつつズレ防止 */
+  background:white;
 }
-#calendar div.today{border:2px solid #e74c3c;}
 
+#calendar div.today{
+  border:2px solid #e74c3c;
+}
+
+/* 日記入力 */
 #diaryText{
   width:100%;
   min-height:150px;
@@ -62,16 +84,20 @@ h1,h2,h3{text-align:center;}
   border:1px solid #ccc;
 }
 
+/* モーダル */
 #dateModal{
   display:flex;
   justify-content:center;
   align-items:center;
   position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
   background:rgba(0,0,0,0.5);
   z-index:1000;
 }
+
 .modalContent{
   background:#fff;
   padding:20px;
