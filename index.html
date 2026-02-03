@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Diary App</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>English Diary</h1>
+
+<!-- Calendar Screen -->
+<div id="calendarScreen">
+  <div class="calendar-header">
+    <button class="nav-btn" onclick="prevMonth()">← Prev</button>
+    <span id="calendarTitle" class="calendar-title"></span>
+    <button class="nav-btn" onclick="nextMonth()">Next →</button>
+  </div>
+  
+  <div id="weekdayHeader">
+    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div>
+    <div>Thu</div><div>Fri</div><div>Sat</div>
+  </div>
+
+  <div id="calendar"></div>
+  <div style="text-align:center; margin-top:18px;">
+    <button class="nav-btn" onclick="openAnalysis()">View Simple Analysis</button>
+  </div>
+</div>
+
+<!-- Diary Screen -->
+<div id="diaryScreen" style="display:none;">
+  <button class="nav-btn" onclick="backToCalendar()">← Back</button>
+  <h2 id="selectedDate"></h2>
+  
+  <textarea id="diaryText" placeholder="Write your diary in English..." oninput="updateWordCount()"></textarea>
+  
+  <div id="charCount" style="margin-top:5px; font-size:0.95rem; color:#555;">
+    Goal: 50
+  </div>
+
+  <div id="englishWarning" style="color:red; font-weight:bold; margin-top:5px; display:none;">
+    English only! Please write in English.
+  </div>
+  
+  <label>Emotion: </label>
+  <select id="emotionTag">
+    <option value="Happy">Happy</option>
+    <option value="Sad">Sad</option>
+    <option value="Tired">Tired</option>
+    <option value="Excited">Excited</option>
+    <option value="Angry">Angry</option>
+    <option value="Relaxed">Relaxed</option>
+    <option value="Confused">Confused</option>
+    <option value="Loved">Loved</option>
+  </select>
+  <br>
+  <button class="nav-btn" onclick="saveDiary()">Save</button>
+</div>
+
+<!-- Simple Analysis Screen -->
+<div id="analysisScreen" style="display:none;">
+  <button class="nav-btn" onclick="backToCalendar()">← Back</button>
+  <div id="analysis">
+    <h3>Simple Analysis (Your Dictionary)</h3>
+    <div id="wordCount"></div>
+  </div>
+</div>
+
+<!-- Date Selection Modal -->
+<div id="dateModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+  <div style="background:#fff; padding:20px; border-radius:10px; max-width:350px;">
+    <h4>Select Date</h4>
+    <div id="modalDates" style="margin-top:10px;"></div>
+    <button class="nav-btn" style="margin-top:10px;" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
