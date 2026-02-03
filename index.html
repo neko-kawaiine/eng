@@ -25,7 +25,7 @@
 
   <div id="calendar"></div>
 
-  <div style="text-align:center; margin-top:10px;">
+  <div style="text-align:center;margin-top:10px;">
     <button class="nav-btn" onclick="openAnalysis()">View Simple Analysis</button>
   </div>
 </div>
@@ -34,17 +34,11 @@
 <div id="diaryScreen" style="display:none;">
   <button class="nav-btn" onclick="backToCalendar()">← Back</button>
   <h2 id="selectedDate"></h2>
-  
   <textarea id="diaryText" placeholder="Write your diary in English..." oninput="updateWordCount()"></textarea>
-  
-  <div id="charCount" style="margin-top:5px; font-size:0.95rem; color:#555;">
-    Goal: 50
-  </div>
-
-  <div id="englishWarning" style="color:red; font-weight:bold; margin-top:5px; display:none;">
+  <div id="wordCountDisplay" style="margin-top:5px; font-size:0.95rem; color:#555;">Goal: 50</div>
+  <div id="englishWarning" style="color:red;font-weight:bold;margin-top:5px;display:none;">
     English only! Please write in English.
   </div>
-  
   <label>Emotion: </label>
   <select id="emotionTag">
     <option value="Happy">Happy</option>
@@ -63,17 +57,16 @@
 <!-- Analysis Screen -->
 <div id="analysisScreen" style="display:none;">
   <button class="nav-btn" onclick="backToCalendar()">← Back</button>
-  <h3 style="text-align:center;">Simple Analysis (Your Dictionary)</h3>
-  <div id="wordCount"></div>
+  <h3>Simple Analysis (Your Dictionary)</h3>
+  <div id="wordAnalysis"></div>
 </div>
 
-<!-- Modal for selecting dates from analysis -->
-<div id="dateModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
-background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
-  <div style="background:#fff; padding:20px; border-radius:10px; max-width:350px;">
+<!-- Modal for selecting date -->
+<div id="dateModal" style="display:none;">
+  <div class="modalContent">
     <h4>Select Date</h4>
-    <div id="modalDates" style="margin-top:10px;"></div>
-    <button class="nav-btn" style="margin-top:10px;" onclick="closeModal()">Cancel</button>
+    <div id="modalDates"></div>
+    <button class="nav-btn" onclick="closeModal()">Cancel</button>
   </div>
 </div>
 
